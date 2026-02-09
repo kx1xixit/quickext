@@ -119,11 +119,11 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `Build Report (Node ${{ matrix.node-version }})
-            
-[PASS] Extension built successfully
-- File size: ${sizeKB} KB
-- Valid JavaScript syntax
-- Ready for testing
 
-Download artifact: [extension-${{ matrix.node-version }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`
+            [PASS] Extension built successfully
+            - File size: ${sizeKB} KB
+            - Valid JavaScript syntax
+            - Ready for testing
+
+            Download artifact: [extension-${{ matrix.node-version }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`
             });
