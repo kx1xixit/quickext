@@ -7,8 +7,7 @@
     "build": "node scripts/build.js",
     "watch": "node scripts/build.js --watch",
     "lint": "eslint src/",
-    "format": "prettier --write src/",
-    "test": "echo \"Tests go here\" && exit 0"
+    "format": "prettier --write src/"
   },
   "keywords": ["turbowarp", "scratch", "extension"],
   "author": "",
