@@ -101,8 +101,8 @@ function buildExtension() {
     fs.writeFileSync(OUTPUT_FILE, output, 'utf8');
     
     const size = (output.length / 1024).toFixed(2);
-    console.log(`✓ Build successful: ${OUTPUT_FILE} (${size} KB)`);
-    console.log(`  Bundled ${sourceFiles.length} source file(s)`);
+    console.log(`[BUILD] Extension build successful: ${OUTPUT_FILE} (${size} KB)`);
+    console.log(`        Bundled ${sourceFiles.length} source file(s)`);
     
     return true;
   } catch (err) {
