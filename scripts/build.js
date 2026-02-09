@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const SRC_DIR = path.join(__dirname, '../src');
 const BUILD_DIR = path.join(__dirname, '../build');
@@ -114,10 +117,10 @@ function buildExtension() {
 /**
  * Watch for file changes
  */
-function watchFiles() {
+async function watchFiles() {
   let chokidar;
   try {
-    chokidar = require('chokidar');
+    chokidar = (await import('chokidar')).default;
   } catch (err) {
     console.error('Watch mode requires chokidar. Install it with: npm install --save-dev chokidar');
     process.exit(1);
