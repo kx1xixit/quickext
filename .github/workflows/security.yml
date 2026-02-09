@@ -9,6 +9,9 @@ on:
     # Run security checks daily
     - cron: '0 0 * * *'
 
+permissions:
+  contents: read
+
 jobs:
   dependency-check:
     runs-on: ubuntu-latest
