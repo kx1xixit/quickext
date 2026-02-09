@@ -1,11 +1,11 @@
 /**
  * Example Module - Add your extension features here
- * 
+ *
  * To add blocks to your extension:
  * 1. Add block definitions to the main extension's getInfo() method (01-core.js)
  * 2. Add the block implementation methods here in separate files
  * 3. Add them to the class in 01-core.js
- * 
+ *
  * This is a reference module showing how to organize blocks across files.
  */
 
@@ -28,7 +28,7 @@ function calculateDistance(args) {
   const y1 = Number(args.Y1) || 0;
   const x2 = Number(args.X2) || 0;
   const y2 = Number(args.Y2) || 0;
-  
+
   const dx = x2 - x1;
   const dy = y2 - y1;
   return Math.sqrt(dx * dx + dy * dy);
