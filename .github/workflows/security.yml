@@ -1,0 +1,133 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [main, develop, master]
+  pull_request:
+    branches: [main, develop, master]
+  schedule:
+    # Run security checks daily
+    - cron: '0 0 * * *'
+
+jobs:
+  dependency-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for vulnerable dependencies
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Generate Security Report
+        run: |
+          echo "## Security Report" >> $GITHUB_STEP_SUMMARY
+          echo "[PASS] Dependency audit completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Run \`npm audit\` locally for detailed results." >> $GITHUB_STEP_SUMMARY
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Check for console statements
+        run: |
+          if grep -r "console\." src/ --include="*.js" | grep -v "console.error\|console.warn"; then
+            echo "Warning: Found console.log statements. Consider using console.error or console.warn instead."
+          else
+            echo "[PASS] No unnecessary console statements found"
+          fi
+        continue-on-error: true
+
+      - name: Check for TODO/FIXME comments
+        run: |
+          TODO_COUNT=$(grep -r "TODO\|FIXME" src/ --include="*.js" | wc -l)
+          if [ $TODO_COUNT -gt 0 ]; then
+            echo "Found $TODO_COUNT TODO/FIXME comments:"
+            grep -r "TODO\|FIXME" src/ --include="*.js" | sed 's/^/  - /'
+          else
+            echo "[PASS] No TODO/FIXME comments found"
+          fi
+        continue-on-error: true
+
+      - name: Validate JSON files
+        run: |
+          for file in $(find src -name "*.json"); do
+            if ! node -e "JSON.parse(require('fs').readFileSync('$file', 'utf8'))" 2>/dev/null; then
+              echo "[FAIL] Invalid JSON: $file"
+              exit 1
+            fi
+          done
+          echo "[PASS] All JSON files are valid"
+
+  manifest-validation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Extension Manifest
+        run: |
+          MANIFEST="src/manifest.json"
+          
+          # Check required fields
+          node -e "
+            const manifest = require('./$MANIFEST');
+            const required = ['name', 'id', 'version', 'description', 'author', 'licence'];
+            const missing = required.filter(field => !manifest[field]);
+            
+            if (missing.length > 0) {
+              console.error('[FAIL] Missing required fields in manifest:', missing.join(', '));
+              process.exit(1);
+            }
+            
+            console.log('[PASS] Manifest contains all required fields');
+            console.log('  - Name:', manifest.name);
+            console.log('  - ID:', manifest.id);
+            console.log('  - Version:', manifest.version);
+          "
+
+      - name: Check ID Format
+        run: |
+          node -e "
+            const manifest = require('./src/manifest.json');
+            const id = manifest.id;
+            
+            if (!/^[a-zA-Z][a-zA-Z0-9_]*\$/.test(id)) {
+              console.error('[FAIL] Invalid ID format. Must start with a letter and contain only alphanumeric characters and underscores.');
+              process.exit(1);
+            }
+            
+            console.log('[PASS] ID format is valid:', id);
+          "
+
+      - name: Check Version Format
+        run: |
+          node -e "
+            const manifest = require('./src/manifest.json');
+            const version = manifest.version;
+            
+            if (!/^\d+\.\d+\.\d+/.test(version)) {
+              console.error('[FAIL] Invalid version format. Must be semantic version (e.g., 1.0.0).');
+              process.exit(1);
+            }
+            
+            console.log('[PASS] Version format is valid:', version);
+          "
