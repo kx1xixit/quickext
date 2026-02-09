@@ -188,7 +188,7 @@ getInfo() {
 ### 1. Use Meaningful Names
 
 ```javascript
-// ✓ Good
+// Good
 {
   opcode: 'moveForward',
   text: 'move forward [STEPS] steps',
@@ -197,7 +197,7 @@ getInfo() {
   }
 }
 
-// ✗ Bad
+// Bad
 {
   opcode: 'go',
   text: 'go [X]',

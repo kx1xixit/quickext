@@ -126,11 +126,11 @@ git push origin main --tags
 
 ## Need Help?
 
-- 📖 Full docs: [README.md](README.md)
-- 🤝 Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
-- 🐛 Issues: [Create an issue](../../issues/new)
-- 📚 Scratch Extension Protocol: [Scratch Wiki](https://en.scratch-wiki.info/wiki/Scratch_Extension_Protocol)
+- Full docs: [README.md](README.md)
+- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Issues: [Create an issue](../../issues/new)
+- Scratch Extension Protocol: [Scratch Wiki](https://en.scratch-wiki.info/wiki/Scratch_Extension_Protocol)
 
 ---
 
-**Happy extending!** 🚀
+Happy extending!

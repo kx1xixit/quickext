@@ -4,13 +4,13 @@ A template repository for creating **TurboWarp/Scratch extensions** with CI/CD w
 
 ## Features
 
-- 🏗️ **Modular Architecture**: Organize your extension code into separate files
-- 🔨 **Automated Build System**: Combines multiple JS files from `/src/` into a single extension bundle
-- 🔄 **CI/CD Workflows**: GitHub Actions for building, testing, and releasing
-- 🎯 **Watch Mode**: Development mode with automatic rebuilding on file changes
-- 📝 **Linting & Formatting**: ESLint and Prettier pre-configured
-- 🚀 **Release Automation**: Automatic release creation with build artifacts
-- ✅ **Scratch Extension Format**: Ready for TurboWarp or Scratch 3.0+ environments
+- **Modular Architecture**: Organize your extension code into separate files
+- **Automated Build System**: Combines multiple JS files from `/src/` into a single extension bundle
+- **CI/CD Workflows**: GitHub Actions for building, testing, and releasing
+- **Watch Mode**: Development mode with automatic rebuilding on file changes
+- **Linting & Formatting**: ESLint and Prettier pre-configured
+- **Release Automation**: Automatic release creation with build artifacts
+- **Scratch Extension Format**: Ready for TurboWarp or Scratch 3.0+ environments
 
 ## Getting Started
 
