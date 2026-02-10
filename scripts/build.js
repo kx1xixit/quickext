@@ -41,7 +41,7 @@ function generateHeader(manifest) {
     description: manifest.description || 'A TurboWarp extension',
     by: manifest.author || 'Anonymous',
     version: manifest.version || '1.0.0',
-    licence: manifest.licence || 'MIT'
+    license: manifest.license || 'MIT'
   };
 
   let header = '';
@@ -49,7 +49,7 @@ function generateHeader(manifest) {
   header += `// ID: ${metadata.id}\n`;
   header += `// Description: ${metadata.description}\n`;
   header += `// By: ${metadata.by}\n`;
-  header += `// Licence: ${metadata.licence}\n`;
+  header += `// License: ${metadata.license}\n`;
   header += `\n`;
   header += `// Version ${metadata.version}\n`;
   header += `\n`;
