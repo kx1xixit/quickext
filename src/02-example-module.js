@@ -15,7 +15,6 @@
 /**
  * Example: Advanced block with color manipulation
  */
-
 export function colorBlock(args) {
   const color = args.COLOR || '#FF0000';
   return `Selected color: ${color}`;
