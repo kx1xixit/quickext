@@ -93,7 +93,7 @@ jobs:
           # Check required fields
           node -e "
             const manifest = require('./$MANIFEST');
-            const required = ['name', 'id', 'version', 'description', 'author', 'licence'];
+            const required = ['name', 'id', 'version', 'description', 'author', 'license'];
             const missing = required.filter(field => !manifest[field]);
             
             if (missing.length > 0) {
