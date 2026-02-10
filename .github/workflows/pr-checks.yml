@@ -1,4 +1,4 @@
-name: PR Checks
+name: PR checks
 
 on:
   pull_request:
@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check PR Title
+      - name: Check PR title
         uses: actions/github-script@v8
         with:
           script: |
@@ -34,7 +34,7 @@ jobs:
               core.warning(`PR title doesn't follow conventional commits format: "${title}"`);
             }
 
-      - name: Check PR Description
+      - name: Check PR description
         uses: actions/github-script@v8
         with:
           script: |
@@ -43,7 +43,7 @@ jobs:
               core.warning('PR description is empty. Please add details about your changes.');
             }
 
-      - name: Check for Commits
+      - name: Check for commits
         uses: actions/github-script@v8
         with:
           script: |
@@ -80,7 +80,7 @@ jobs:
       - name: Build extension
         run: npm run build
 
-      - name: Verify Extension Output
+      - name: Verify extension output
         run: |
           if [ ! -f build/extension.js ]; then
             echo "[FAIL] Build failed: extension.js not found"
@@ -94,18 +94,18 @@ jobs:
           # Verify it's valid JavaScript
           node -c build/extension.js && echo "[PASS] Valid JavaScript syntax"
 
-      - name: Run Linter
+      - name: Run ESLint
         run: npm run lint
         continue-on-error: true
 
-      - name: Upload Build Artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v6
         with:
           name: extension-${{ matrix.node-version }}
           path: build/extension.js
           retention-days: 7
 
-      - name: Comment PR with Results
+      - name: Comment PR with results
         if: always()
         uses: actions/github-script@v8
         with:
