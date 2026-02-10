@@ -21,6 +21,7 @@
     "@eslint/js": "^10.0.0",
     "chokidar": "^5.0.0",
     "eslint": "^10.0.0",
+    "globals": "^17.3.0",
     "prettier": "^3.0.0"
   }
 }
