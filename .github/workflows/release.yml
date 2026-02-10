@@ -27,7 +27,7 @@ jobs:
       - name: Build extension
         run: npm run build
 
-      - name: Create Release and Upload Asset
+      - name: Create release and upload asset
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
