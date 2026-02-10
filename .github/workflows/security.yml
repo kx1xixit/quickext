@@ -1,4 +1,4 @@
-name: Security Checks
+name: Security checks
 
 on:
   push:
@@ -32,9 +32,9 @@ jobs:
         run: npm audit --audit-level=moderate
         continue-on-error: true
 
-      - name: Generate Security Report
+      - name: Generate security report
         run: |
-          echo "## Security Report" >> $GITHUB_STEP_SUMMARY
+          echo "## Security report" >> $GITHUB_STEP_SUMMARY
           echo "[PASS] Dependency audit completed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Run \`npm audit\` locally for detailed results." >> $GITHUB_STEP_SUMMARY
@@ -86,7 +86,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Validate Extension Manifest
+      - name: Validate extension manifest
         run: |
           MANIFEST="src/manifest.json"
 
@@ -107,7 +107,7 @@ jobs:
             console.log('  - Version:', manifest.version);
           "
 
-      - name: Check ID Format
+      - name: Check ID format
         run: |
           node -e "
             const manifest = require('./src/manifest.json');
@@ -121,7 +121,7 @@ jobs:
             console.log('[PASS] ID format is valid:', id);
           "
 
-      - name: Check Version Format
+      - name: Check version format
         run: |
           node -e "
             const manifest = require('./src/manifest.json');
