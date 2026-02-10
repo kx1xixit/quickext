@@ -17,5 +17,8 @@ jobs:
       - name: Run CSpell
         uses: streetsidesoftware/cspell-action@v6
         with:
-          files: 'docs/**/*'
+       - name: Run CSpell
+         uses: streetsidesoftware/cspell-action@v6
+         with:
+           strict: true
           strict: true
