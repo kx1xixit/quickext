@@ -99,7 +99,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: extension-${{ matrix.node-version }}
           path: build/extension.js
