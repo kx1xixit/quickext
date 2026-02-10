@@ -25,7 +25,7 @@ export function colorBlock(args) {
 /**
  * Example: Block that performs calculations
  */
-function calculateDistance(args) {
+export function calculateDistance(args) {
   const x1 = Number(args.X1) || 0;
   const y1 = Number(args.Y1) || 0;
   const x2 = Number(args.X2) || 0;
