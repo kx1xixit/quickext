@@ -1,4 +1,4 @@
-name: Validate Extension
+name: Validate extension
 
 on:
   push:
@@ -32,12 +32,12 @@ jobs:
       - name: Build extension
         run: npm run build
 
-      - name: Verify Syntax
+      - name: Verify syntax
         run: |
           node -c build/extension.js
           echo "Extension syntax is valid"
 
-      - name: Check Extension Structure
+      - name: Check sxtension structure
         run: |
           node << 'EOF'
           const fs = require('fs');
