@@ -1,4 +1,4 @@
-name: CodeQL Analysis
+name: CodeQL analysis
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
         language: ['javascript']
 
     steps:
-      - name: Checkout repository
+      - name: Check out repository
         uses: actions/checkout@v6
 
       - name: Initialize CodeQL
@@ -34,7 +34,7 @@ jobs:
           queries: security-and-quality
           db-location: ${{ runner.temp }}/codeql_databases
 
-      - name: Perform CodeQL Analysis
+      - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v4
         with:
           category: '/language:${{ matrix.language }}'

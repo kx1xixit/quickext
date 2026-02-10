@@ -16,9 +16,5 @@ jobs:
 
       - name: Run CSpell
         uses: streetsidesoftware/cspell-action@v6
-        with:
-       - name: Run CSpell
-         uses: streetsidesoftware/cspell-action@v6
-         with:
-           strict: true
+        with: 
           strict: true

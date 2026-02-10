@@ -1,4 +1,4 @@
-name: Documentation
+name: Documentation checks
 
 on:
   push:
@@ -51,7 +51,7 @@ jobs:
           done
           echo "[PASS] Markdown validation complete"
 
-      - name: Check Code Examples
+      - name: Check code examples
         run: |
           echo "Verifying code examples in documentation..."
 
@@ -65,7 +65,7 @@ jobs:
             echo "[PASS] Documentation includes manifest examples"
           fi
 
-      - name: Generate Documentation Report
+      - name: Generate documentation report
         run: |
           echo "## Documentation Check Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
