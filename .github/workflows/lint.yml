@@ -1,4 +1,4 @@
-name: Lint and Format
+name: Lint and format
 
 on:
   push:
@@ -33,6 +33,6 @@ jobs:
         run: npm run lint
         continue-on-error: false
 
-      - name: Check Code Formatting
+      - name: Check code formatting
         run: npx prettier --check src/
         continue-on-error: true
