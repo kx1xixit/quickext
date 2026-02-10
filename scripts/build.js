@@ -69,7 +69,7 @@ function getSourceFiles() {
 }
 
 /**
- * Build the extension by concatenating all JS files
+ * Build the extension by concatenating and cleaning JS files
  */
 function buildExtension() {
   try {
@@ -84,15 +84,27 @@ function buildExtension() {
     output += '  "use strict";\n\n';
     
     // Concatenate all source files
-    sourceFiles.forEach((file, index) => {
+    sourceFiles.forEach((file) => {
       const filename = path.basename(file);
       output += `  // ===== ${filename} =====\n`;
-      const content = fs.readFileSync(file, 'utf8');
-      // Indent the content
+      
+      let content = fs.readFileSync(file, 'utf8');
+
+      /**
+       * TRANSFORM MODULES TO PLAIN JS
+       * These regexes remove ESM syntax so the browser doesn't crash.
+       */
+      // 1. Remove import lines (e.g., import { x } from './y.js';)
+      content = content.replace(/^import\s+[\s\S]*?from\s+['"].*?['"];?/gm, '');
+      
+      // 2. Remove 'export ' prefix from function/class/const declarations
+      content = content.replace(/^export\s+/gm, '');
+
+      // Indent the content for the IIFE
       const indentedContent = content.split('\n').map(line => {
-        if (line.length === 0) return '';
-        return '  ' + line;
+        return line.length === 0 ? '' : '  ' + line;
       }).join('\n');
+      
       output += indentedContent;
       output += '\n\n';
     });
