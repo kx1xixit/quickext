@@ -4,6 +4,10 @@
  * Load this first (01-* naming convention)
  */
 
+
+// Import colorBlock from 02-example-module.js
+import { colorBlock } from './02-example-module.js';
+
 class TurboWarpExtension {
   constructor() {
     this.runtime = null;
@@ -43,6 +47,17 @@ class TurboWarpExtension {
             },
           },
         },
+        {
+          opcode: 'colorBlock',
+          blockType: 'reporter',
+          text: 'selected color [COLOR]',
+          arguments: {
+            COLOR: {
+              type: 'color',
+              defaultValue: '#FF0000',
+            },
+          },
+        },
       ],
     };
   }
@@ -57,8 +72,16 @@ class TurboWarpExtension {
   /**
    * Block implementation: Add
    */
+
   add(args) {
     return Number(args.A) + Number(args.B);
+  }
+
+  /**
+   * Block implementation: Color Block (delegates to 02-example-module.js)
+   */
+  colorBlock(args) {
+    return colorBlock(args);
   }
 }
 

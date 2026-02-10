@@ -9,13 +9,15 @@
  * This is a reference module showing how to organize blocks across files.
  */
 
+
 // Example block implementations
-// These would typically go in 01-core.js directly or be added to the class
+// These can be imported into 01-core.js
 
 /**
  * Example: Advanced block with color manipulation
  */
-function colorBlock(args) {
+
+export function colorBlock(args) {
   const color = args.COLOR || '#FF0000';
   return `Selected color: ${color}`;
 }
