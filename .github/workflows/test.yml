@@ -37,7 +37,7 @@ jobs:
           node -c build/extension.js
           echo "Extension syntax is valid"
 
-      - name: Check sxtension structure
+      - name: Check extension structure
         run: |
           node << 'EOF'
           const fs = require('fs');
