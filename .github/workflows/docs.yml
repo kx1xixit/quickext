@@ -21,14 +21,14 @@ permissions:
 jobs:
   check-docs:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Check for broken links in Markdown
         run: |
           echo "Checking documentation for common issues..."
-          
+
           # Check if main docs exist
           for file in README.md QUICKSTART.md CONTRIBUTING.md; do
             if [ ! -f "$file" ]; then
@@ -54,12 +54,12 @@ jobs:
       - name: Check Code Examples
         run: |
           echo "Verifying code examples in documentation..."
-          
+
           # Check that examples reference correct filenames
           if grep -q "src/03-" README.md CONTRIBUTING.md; then
             echo "[PASS] Documentation references match actual structure"
           fi
-          
+
           # Verify manifest.json example matches actual file
           if grep -q '"id":' QUICKSTART.md; then
             echo "[PASS] Documentation includes manifest examples"

@@ -31,6 +31,7 @@ A template repository for creating **TurboWarp/Scratch extensions** with CI/CD w
 ### Development
 
 #### Build the extension
+
 ```bash
 npm run build
 ```
@@ -38,16 +39,19 @@ npm run build
 This creates `build/extension.js` by combining all `.js` files from `src/`.
 
 #### Watch mode (automatic rebuild on file changes)
+
 ```bash
 npm run watch
 ```
 
 #### Lint your code
+
 ```bash
 npm run lint
 ```
 
 #### Format code
+
 ```bash
 npm run format
 ```
@@ -83,7 +87,7 @@ Files in `src/` are loaded in **alphabetical order** by the build script. Use nu
 The generated `extension.js` includes:
 
 1. **Extension Header**: Generated from `src/manifest.json`
-2. **IIFE Wrapper**: `(function (Scratch) { ... })(Scratch)` 
+2. **IIFE Wrapper**: `(function (Scratch) { ... })(Scratch)`
 3. **All Source Files**: Concatenated in alphabetical order
 4. **Extension Registration**: `Scratch.extensions.register(new YourExtension())`
 
@@ -151,6 +155,7 @@ Edit `.eslintrc.json` and `.prettierrc.json` to customize linting and formatting
 ### Build Workflow (`.github/workflows/build.yml`)
 
 Automatically builds the extension on:
+
 - Push to `main`, `develop`, or `master` branches
 - Pull requests to these branches
 - Tests against Node.js 18.x and 20.x
@@ -165,6 +170,7 @@ Automatically builds and releases the extension when you:
 2. Push the tag: `git push origin v1.0.0`
 
 The workflow will:
+
 - Build the extension
 - Create a GitHub release
 - Upload `build/extension.js` as a release asset
@@ -196,16 +202,19 @@ To test locally during development, you can use a fork of TurboWarp that loads e
 ## Troubleshooting
 
 ### Extension doesn't load
+
 - Check browser console for error messages
 - Verify the extension ID is unique
 - Ensure syntax is valid: run `npm run lint`
 
 ### Changes not reflected
+
 - Run `npm run build` to rebuild if not in watch mode
 - Hard refresh TurboWarp (Ctrl+Shift+R)
 - For block changes: reload extension via "Load Custom Extension"
 
 ### Build errors
+
 - Check that all `.js` files in `src/` have valid JavaScript syntax
 - Run `npm run lint` to find potential issues
 - Ensure manifest.json is valid JSON

@@ -42,7 +42,7 @@ jobs:
           node << 'EOF'
           const fs = require('fs');
           const content = fs.readFileSync('build/extension.js', 'utf8');
-          
+
           const checks = {
             'Extension header (// Name:)': /^\/\/ Name:/m,
             'IIFE function': /\(function\s*\(\s*Scratch\s*\)/m,
@@ -51,10 +51,10 @@ jobs:
             'Extension registration': /Scratch\.extensions\.register/,
             'Closing IIFE': /\}\)\(Scratch\);$/m,
           };
-          
+
           console.log('Checking extension structure...\n');
           let allPass = true;
-          
+
           for (const [check, pattern] of Object.entries(checks)) {
             if (pattern.test(content)) {
               console.log(`[PASS] ${check}`);
@@ -63,10 +63,10 @@ jobs:
               allPass = false;
             }
           }
-          
+
           if (!allPass) {
             process.exit(1);
           }
-          
+
           console.log('\nAll structure checks passed');
           EOF

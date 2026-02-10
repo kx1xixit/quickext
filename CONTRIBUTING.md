@@ -78,6 +78,7 @@ Example:
 Scratch supports multiple argument types:
 
 ### Strings
+
 ```javascript
 TEXT: {
   type: 'string',
@@ -86,6 +87,7 @@ TEXT: {
 ```
 
 ### Numbers
+
 ```javascript
 COUNT: {
   type: 'number',
@@ -94,6 +96,7 @@ COUNT: {
 ```
 
 ### Booleans
+
 ```javascript
 ENABLED: {
   type: 'boolean',
@@ -102,6 +105,7 @@ ENABLED: {
 ```
 
 ### Dropdowns (Menus)
+
 ```javascript
 COLOR: {
   type: 'string',
@@ -114,7 +118,7 @@ Then define the menu:
 
 ```javascript
 menus: {
-  colors: ['red', 'green', 'blue']
+  colors: ['red', 'green', 'blue'];
 }
 ```
 
@@ -132,16 +136,19 @@ Files load in alphabetical order, so you can reference helpers in your core clas
 ## Code Quality
 
 ### Run the linter
+
 ```bash
 npm run lint
 ```
 
 ### Format your code
+
 ```bash
 npm run format
 ```
 
 ### Fix linting errors
+
 ```bash
 npm run lint -- --fix
 ```
@@ -164,6 +171,7 @@ getInfo() {
 ```
 
 Common colors:
+
 - `#4CAF50` - Green
 - `#0066CC` - Blue
 - `#CC5500` - Orange
@@ -248,7 +256,7 @@ distance(args) {
   const y1 = Number(args.Y1);
   const x2 = Number(args.X2);
   const y2 = Number(args.Y2);
-  
+
   const dx = x2 - x1;
   const dy = y2 - y1;
   return Math.sqrt(dx * dx + dy * dy);
@@ -290,17 +298,20 @@ Before releasing a new version:
 ## Troubleshooting
 
 ### Block doesn't appear in editor?
+
 - Check browser console for errors
 - Verify block is defined in `getInfo()`
 - Ensure the extension class is instantiated and registered
 - Hard refresh TurboWarp (Ctrl+Shift+R)
 
 ### Block doesn't work?
+
 - Run `npm run lint` to find syntax errors
 - Check browser console for runtime errors
 - Verify argument names match between definition and implementation
 
 ### Build errors?
+
 - Run `npm run lint` to find issues
 - Check that all JavaScript files are valid
 - Ensure `manifest.json` is valid JSON

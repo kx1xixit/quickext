@@ -2,7 +2,7 @@ import js from '@eslint/js';
 
 export default [
   {
-    ignores: ['node_modules/', 'build/']
+    ignores: ['node_modules/', 'build/'],
   },
   {
     files: ['src/**/*.js'],
@@ -10,20 +10,20 @@ export default [
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
-        Scratch: 'readonly'
-      }
+        Scratch: 'readonly',
+      },
     },
     rules: {
       ...js.configs.recommended.rules,
       'no-unused-vars': [
         'warn',
         {
-          args: 'none'
-        }
+          args: 'none',
+        },
       ],
       'no-console': 'off',
       'no-var': 'warn',
-      'prefer-const': 'warn'
-    }
-  }
+      'prefer-const': 'warn',
+    },
+  },
 ];

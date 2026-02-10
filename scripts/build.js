@@ -41,7 +41,7 @@ function generateHeader(manifest) {
     description: manifest.description || 'A TurboWarp extension',
     by: manifest.author || 'Anonymous',
     version: manifest.version || '1.0.0',
-    license: manifest.license || 'MIT'
+    license: manifest.license || 'MIT',
   };
 
   let header = '';
@@ -53,7 +53,7 @@ function generateHeader(manifest) {
   header += `\n`;
   header += `// Version ${metadata.version}\n`;
   header += `\n`;
-  
+
   return header;
 }
 
@@ -61,10 +61,11 @@ function generateHeader(manifest) {
  * Get all JS files from src directory in order
  */
 function getSourceFiles() {
-  const files = fs.readdirSync(SRC_DIR)
+  const files = fs
+    .readdirSync(SRC_DIR)
     .filter(file => file.endsWith('.js') && !file.startsWith('.'))
     .sort();
-  
+
   return files.map(file => path.join(SRC_DIR, file));
 }
 
@@ -76,18 +77,18 @@ function buildExtension() {
     const manifest = getManifest();
     const header = generateHeader(manifest);
     const sourceFiles = getSourceFiles();
-    
+
     let output = header;
-    
+
     // Add IIFE wrapper that takes Scratch as parameter
     output += '(function (Scratch) {\n';
     output += '  "use strict";\n\n';
-    
+
     // Concatenate all source files
-    sourceFiles.forEach((file) => {
+    sourceFiles.forEach(file => {
       const filename = path.basename(file);
       output += `  // ===== ${filename} =====\n`;
-      
+
       let content = fs.readFileSync(file, 'utf8');
 
       /**
@@ -96,29 +97,32 @@ function buildExtension() {
        */
       // 1. Remove import lines (e.g., import { x } from './y.js';)
       content = content.replace(/^import\s+[\s\S]*?from\s+['"].*?['"];?/gm, '');
-      
+
       // 2. Remove 'export ' prefix from function/class/const declarations
       content = content.replace(/^export\s+/gm, '');
 
       // Indent the content for the IIFE
-      const indentedContent = content.split('\n').map(line => {
-        return line.length === 0 ? '' : '  ' + line;
-      }).join('\n');
-      
+      const indentedContent = content
+        .split('\n')
+        .map(line => {
+          return line.length === 0 ? '' : '  ' + line;
+        })
+        .join('\n');
+
       output += indentedContent;
       output += '\n\n';
     });
-    
+
     // Close IIFE
     output += '})(Scratch);\n';
-    
+
     // Write output
     fs.writeFileSync(OUTPUT_FILE, output, 'utf8');
-    
+
     const size = (output.length / 1024).toFixed(2);
     console.log(`[BUILD] Extension build successful: ${OUTPUT_FILE} (${size} KB)`);
     console.log(`        Bundled ${sourceFiles.length} source file(s)`);
-    
+
     return true;
   } catch (err) {
     console.error('✗ Build failed:', err.message);
@@ -137,28 +141,28 @@ async function watchFiles() {
     console.error('Watch mode requires chokidar. Install it with: npm install --save-dev chokidar');
     process.exit(1);
   }
-  
+
   console.log('Watching for changes in', SRC_DIR);
-  
+
   const watcher = chokidar.watch(SRC_DIR, {
     ignored: /(^|[\/\\])\./,
     awaitWriteFinish: {
       stabilityThreshold: 100,
-      pollInterval: 100
-    }
+      pollInterval: 100,
+    },
   });
-  
-  watcher.on('change', (file) => {
+
+  watcher.on('change', file => {
     console.log(`Changed: ${path.basename(file)}`);
     buildExtension();
   });
-  
-  watcher.on('add', (file) => {
+
+  watcher.on('add', file => {
     console.log(`Added: ${path.basename(file)}`);
     buildExtension();
   });
-  
-  watcher.on('unlink', (file) => {
+
+  watcher.on('unlink', file => {
     console.log(`Removed: ${path.basename(file)}`);
     buildExtension();
   });

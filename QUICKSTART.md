@@ -39,7 +39,7 @@ npm run build
 ## Using Your Extension
 
 1. **Build**: `npm run build`
-2. **Load in TurboWarp**: 
+2. **Load in TurboWarp**:
    - Go to [turbowarp.org](https://turbowarp.org)
    - Click "Add Extension"
    - Click "Load Custom Extension"
@@ -102,13 +102,13 @@ myBlock(args) {
 
 ## Common Commands
 
-| Command | What it does |
-|---------|-------------|
-| `npm run build` | Build the extension once |
-| `npm run watch` | Rebuild automatically on changes |
-| `npm run lint` | Check for code errors |
-| `npm run format` | Auto-format your code |
-| `npm run test` | Run tests |
+| Command          | What it does                     |
+| ---------------- | -------------------------------- |
+| `npm run build`  | Build the extension once         |
+| `npm run watch`  | Rebuild automatically on changes |
+| `npm run lint`   | Check for code errors            |
+| `npm run format` | Auto-format your code            |
+| `npm run test`   | Run tests                        |
 
 ## Publishing a Release
 

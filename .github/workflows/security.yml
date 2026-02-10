@@ -15,7 +15,7 @@ permissions:
 jobs:
   dependency-check:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -41,7 +41,7 @@ jobs:
 
   code-quality:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -82,14 +82,14 @@ jobs:
 
   manifest-validation:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Validate Extension Manifest
         run: |
           MANIFEST="src/manifest.json"
-          
+
           # Check required fields
           node -e "
             const manifest = require('./$MANIFEST');

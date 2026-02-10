@@ -11,7 +11,7 @@ permissions:
 jobs:
   validate-pr:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,9 +27,9 @@ jobs:
               /^(Feature|Fix|Docs|Style|Refactor|Performance|Test|Chore):/,
               /^(\d+\.)?\d+\.\d+/, // Version numbers
             ];
-            
+
             const isValid = validPatterns.some(pattern => pattern.test(title));
-            
+
             if (!isValid) {
               core.warning(`PR title doesn't follow conventional commits format: "${title}"`);
             }
@@ -52,7 +52,7 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number,
             });
-            
+
             if (commits.data.length === 0) {
               core.setFailed('PR has no commits');
             }
@@ -86,11 +86,11 @@ jobs:
             echo "[FAIL] Build failed: extension.js not found"
             exit 1
           fi
-          
+
           # Check file size
           SIZE=$(wc -c < build/extension.js)
           echo "[PASS] Extension built successfully (${SIZE} bytes)"
-          
+
           # Verify it's valid JavaScript
           node -c build/extension.js && echo "[PASS] Valid JavaScript syntax"
 
@@ -113,7 +113,7 @@ jobs:
             const fs = require('fs');
             const size = fs.statSync('build/extension.js').size;
             const sizeKB = (size / 1024).toFixed(2);
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

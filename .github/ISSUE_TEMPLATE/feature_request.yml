@@ -1,19 +1,19 @@
 name: Feature Request
 description: Suggest a new feature
-title: "[Feature] "
-labels: ["enhancement"]
+title: '[Feature] '
+labels: ['enhancement']
 
 body:
   - type: markdown
     attributes:
-      value: "Have an idea for a new feature? Let us know!"
+      value: 'Have an idea for a new feature? Let us know!'
 
   - type: textarea
     id: description
     attributes:
       label: Description
       description: Describe the desired feature
-      placeholder: "What would you like to add or improve?"
+      placeholder: 'What would you like to add or improve?'
     validations:
       required: true
 
@@ -30,4 +30,4 @@ body:
     attributes:
       label: Proposed Implementation
       description: Any ideas on how to implement this?
-      placeholder: "Optional: describe your approach"
+      placeholder: 'Optional: describe your approach'
