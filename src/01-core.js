@@ -4,7 +4,6 @@
  * Load this first (01-* naming convention)
  */
 
-
 // Import colorBlock from 02-example-module.js
 import { colorBlock } from './02-example-module.js';
 

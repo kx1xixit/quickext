@@ -9,7 +9,6 @@
  * This is a reference module showing how to organize blocks across files.
  */
 
-
 // Example block implementations
 // These can be imported into 01-core.js
 
