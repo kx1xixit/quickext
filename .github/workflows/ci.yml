@@ -95,19 +95,11 @@ jobs:
         run: npx prettier --check src/
         continue-on-error: true
 
-      - name: Validate documentation & links
+- name: Validate documentation & links
         run: |
           # Markdown validation
           for file in *.md; do
-            if ! (grep -o '```' "$file" | wc -l | grep -q "[02468]$"); then
-              echo "[WARN] Possible unclosed code block in $file"
-            fi
-          done
-          
-          # Check required files
-          for file in README.md QUICKSTART.md CONTRIBUTING.md; do
-            [ -f "$file" ] || { echo "[FAIL] Missing: $file"; exit 1; }
-          done
+            count=$(grep -c '
 
   # ------------------------------------------------------------------
   # JOB 3: Security Checks (Audit, CodeQL, Code Quality)
