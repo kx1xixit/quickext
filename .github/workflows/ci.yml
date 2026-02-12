@@ -2,9 +2,9 @@ name: Continuous integration
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
-    branches: ['**']
+    branches: [main]
   schedule:
     - cron: '0 2 * * 1'
 
