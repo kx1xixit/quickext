@@ -53,7 +53,7 @@ function generateHeader(manifest) {
   header += `// By: ${metadata.by}\n`;
   header += `// License: ${metadata.license}\n`;
   header += `\n`;
-  header += `// Version ${metadata.version}\n`;
+  header += `// Version: ${metadata.version}\n`;
   header += `\n`;
 
   return header;
