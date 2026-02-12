@@ -142,6 +142,8 @@ async function buildExtension() {
     } catch (err) {
       if (err.code === 'ERR_MODULE_NOT_FOUND') {
         console.warn('        (Skipping maximization: "prettier" not found)');
+      } else {
+        console.warn('[PRETTY] Maximization failed:', err);
       }
     }
 
@@ -164,6 +166,8 @@ async function buildExtension() {
     } catch (err) {
       if (err.code === 'ERR_MODULE_NOT_FOUND') {
         console.warn('        (Skipping minification: "terser" not found)');
+      } else {
+        console.warn('[MINIFY] Minification failed:', err);
       }
     }
 
