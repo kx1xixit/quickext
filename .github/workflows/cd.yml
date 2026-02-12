@@ -5,13 +5,15 @@ on:
     tags:
       - 'v*'
 
-permissions:
-  contents: write
+# Disable global permissions
+permissions: {}
 
 jobs:
   release:
     name: Release extension
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Minimum required to create releases
     steps:
       - uses: actions/checkout@v6
 
@@ -30,7 +32,7 @@ jobs:
       - name: Verify output
         run: |
           if [ ! -f build/extension.js ]; then
-            echo "Build failed: extension.js not found"
+            echo "::error::Build failed: extension.js not found"
             exit 1
           fi
 
