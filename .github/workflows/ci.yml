@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read # Needed to list commits via github-script
+      pull-requests: read
     steps:
       - uses: actions/checkout@v6
         with:
@@ -63,13 +63,13 @@ jobs:
             if (commits.data.length === 0) core.setFailed('PR has no commits');
 
   # ------------------------------------------------------------------
-  # JOB 2: Static Analysis
+  # JOB 2: Static Analysis (With Enhanced Documentation Logging)
   # ------------------------------------------------------------------
   static-analysis:
     name: Static analysis
     runs-on: ubuntu-latest
     permissions:
-      contents: read # Only needs to read code for linting/docs
+      contents: read
     steps:
       - uses: actions/checkout@v6
 
@@ -96,33 +96,46 @@ jobs:
 
       - name: Validate documentation & links
         run: |
+          ERRORS=0
+          echo "--- Checking Markdown Syntax ---"
           for file in *.md; do
             if [ -f "$file" ]; then
               count=$(grep -c '```' "$file")
               if [ $((count % 2)) -ne 0 ]; then
-                echo "[WARN] Unclosed code block in $file"
-                exit 1
+                # Creates a visible error annotation on the GitHub UI
+                echo "::error file=$file::Unclosed code block (found $count backticks). Ensure every opening \`\`\` has a closing \`\`\`."
+                ERRORS=$((ERRORS + 1))
+              else
+                echo "[PASS] $file"
               fi
             fi
           done
           
+          echo "--- Checking Required Files ---"
           for file in README.md QUICKSTART.md CONTRIBUTING.md; do
             if [ ! -f "$file" ]; then
-              echo "[FAIL] Missing: $file"
-              exit 1
+              echo "::error::Required file missing: $file"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "[PASS] Found $file"
             fi
           done
 
+          if [ $ERRORS -ne 0 ]; then
+            echo "Documentation check failed with $ERRORS error(s)."
+            exit 1
+          fi
+
   # ------------------------------------------------------------------
-  # JOB 3: Security Checks
+  # JOB 3: Security Checks (With Warning Annotations)
   # ------------------------------------------------------------------
   security:
     name: Security & quality
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write # Required for CodeQL uploads
-      actions: read          # Required for CodeQL to identify the workflow run
+      security-events: write
+      actions: read
     steps:
       - uses: actions/checkout@v6
 
@@ -148,15 +161,22 @@ jobs:
       - name: Validate JSON files
         run: |
           for file in $(find src -name "*.json"); do
-            node -e "JSON.parse(require('fs').readFileSync('$file', 'utf8'))" || exit 1
+            node -e "JSON.parse(require('fs').readFileSync('$file', 'utf8'))" || { echo "::error file=$file::Invalid JSON syntax"; exit 1; }
           done
 
       - name: Check for TODO/FIXME & console
         run: |
-          if grep -r "console\." src/ --include="*.js" | grep -v "console.error\|console.warn"; then
-            echo "[WARN] Found console usage"
+          # Use warnings so they appear in the PR 'Files Changed' summary
+          CONSOLE_LOGS=$(grep -r "console\." src/ --include="*.js" | grep -v "console.error\|console.warn" || true)
+          if [ ! -z "$CONSOLE_LOGS" ]; then
+            echo "::warning::Found non-standard console usage (log/info/debug). Consider removing before release."
+            echo "$CONSOLE_LOGS"
           fi
-          grep -rE "TODO|FIXME" src/ --include="*.js" || echo "[PASS] No TODOs"
+
+          TODOS=$(grep -rE "TODO|FIXME" src/ --include="*.js" || true)
+          if [ ! -z "$TODOS" ]; then
+            echo "::info::Source contains TODO or FIXME markers."
+          fi
       
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v4
@@ -170,7 +190,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write # Required for the PR comment step
+      pull-requests: write
     strategy:
       matrix:
         node-version: [18.x, 20.x]
@@ -191,7 +211,10 @@ jobs:
 
       - name: Verify build output
         run: |
-          if [ ! -f build/extension.js ]; then exit 1; fi
+          if [ ! -f build/extension.js ]; then 
+            echo "::error::Build artifact 'build/extension.js' was not created."
+            exit 1
+          fi
           node -c build/extension.js
 
       - name: Check extension structure (Regex)
@@ -204,8 +227,11 @@ jobs:
             'IIFE function': /\(function\s*\(\s*Scratch\s*\)/m,
             'Registration': /Scratch\.extensions\.register/,
           };
-          for (const [check, pattern] of Object.entries(checks)) {
-            if (!pattern.test(content)) { console.log(`[FAIL] ${check}`); process.exit(1); }
+          for (const [name, pattern] of Object.entries(checks)) {
+            if (!pattern.test(content)) { 
+              console.error(`::error::Structural check failed: ${name} not found in build output.`);
+              process.exit(1); 
+            }
           }
           EOF
 
@@ -213,9 +239,17 @@ jobs:
         run: |
           node -e "
             const m = require('./src/manifest.json');
-            if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(m.id)) process.exit(1);
-            // Verify the version too
-            if (!/^\d+\.\d+\.\d+$/.test(m.version)) process.exit(1);
+            let failed = false;
+            // Restored literal '$' check from original security.yml
+            if (!/^[a-zA-Z][a-zA-Z0-9_]*\$/.test(m.id)) {
+              console.error(\`::error file=src/manifest.json::Invalid ID format: \"\${m.id}\". Must end with '$'.\`);
+              failed = true;
+            }
+            if (!/^\d+\.\d+\.\d+/.test(m.version)) {
+              console.error(\`::error file=src/manifest.json::Invalid version: \"\${m.version}\". Use SemVer (e.g. 1.0.0).\`);
+              failed = true;
+            }
+            if (failed) process.exit(1);
           "
 
       - name: Upload build artifact
