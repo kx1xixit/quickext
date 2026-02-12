@@ -10,6 +10,7 @@ const SRC_DIR = path.join(__dirname, '../src');
 const BUILD_DIR = path.join(__dirname, '../build');
 const OUTPUT_FILE = path.join(BUILD_DIR, 'extension.js');
 const OUTPUT_MIN_FILE = path.join(BUILD_DIR, 'extension.min.js');
+const OUTPUT_MAX_FILE = path.join(BUILD_DIR, 'max.extension.js');
 
 // Create build directory if it doesn't exist
 if (!fs.existsSync(BUILD_DIR)) {
@@ -71,7 +72,7 @@ function getSourceFiles() {
 }
 
 /**
- * Build the extension by concatenating, cleaning, and minifying JS files
+ * Build the extension by concatenating, cleaning, minifying, and maximizing JS files
  */
 async function buildExtension() {
   try {
@@ -94,12 +95,11 @@ async function buildExtension() {
 
       /**
        * TRANSFORM MODULES TO PLAIN JS
-       * These regexes remove ESM syntax so the browser doesn't crash.
        */
-      // 1. Remove import lines (e.g., import { x } from './y.js';)
+      // 1. Remove import lines
       content = content.replace(/^import\s+[\s\S]*?from\s+['"].*?['"];?/gm, '');
 
-      // 2. Remove 'export ' prefix from function/class/const declarations
+      // 2. Remove 'export ' prefix
       content = content.replace(/^export\s+/gm, '');
 
       // Indent the content for the IIFE
@@ -121,19 +121,41 @@ async function buildExtension() {
     fs.writeFileSync(OUTPUT_FILE, output, 'utf8');
 
     const size = (output.length / 1024).toFixed(2);
-    console.log(`[BUILD] Extension build successful: ${OUTPUT_FILE} (${size} KB)`);
+    console.log(`[BUILD] Standard build successful: ${OUTPUT_FILE} (${size} KB)`);
     console.log(`        Bundled ${sourceFiles.length} source file(s)`);
 
-    // --- Minification Step ---
+    // --- Maximization Step (Prettier) ---
     try {
-      // Dynamic import to allow script to run even if terser isn't installed
+      const { format, resolveConfig } = await import('prettier');
+      
+      // Load your local .prettierrc if it exists, otherwise use defaults
+      const prettierConfig = (await resolveConfig(OUTPUT_MAX_FILE)) || {};
+      
+      const formatted = await format(output, {
+        ...prettierConfig,
+        parser: 'babel', // Force babel parser for JS
+      });
+
+      fs.writeFileSync(OUTPUT_MAX_FILE, formatted, 'utf8');
+      const maxSize = (formatted.length / 1024).toFixed(2);
+      console.log(`[PRETTY] Maximized output created: ${OUTPUT_MAX_FILE} (${maxSize} KB)`);
+
+    } catch (err) {
+      if (err.code === 'ERR_MODULE_NOT_FOUND') {
+        console.warn('        (Skipping maximization: "prettier" not found. Run "npm install -D prettier")');
+      } else {
+        console.error('        (Maximization failed:', err.message, ')');
+      }
+    }
+
+    // --- Minification Step (Terser) ---
+    try {
       const { minify } = await import('terser');
       
       const minified = await minify(output, {
         compress: true,
         mangle: true,
         format: {
-          // Preserve the Metadata comments required by TurboWarp
           comments: /^\/\/\s(Name|ID|Description|By|License|Version)/, 
         },
       });
