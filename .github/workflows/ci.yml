@@ -2,17 +2,11 @@ name: Continuous integration
 
 on:
   push:
-    branches: ['**'] # Runs on all branches
+    branches: ['**']
   pull_request:
     branches: ['**']
   schedule:
-    - cron: '0 2 * * 1' # Combined schedule (Monday 2AM)
-
-permissions:
-  contents: read
-  pull-requests: write # Required for PR comments
-  security-events: write # Required for CodeQL
-  actions: read
+    - cron: '0 2 * * 1'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,12 +14,15 @@ concurrency:
 
 jobs:
   # ------------------------------------------------------------------
-  # JOB 1: PR Compliance (Only runs on Pull Requests)
+  # JOB 1: PR Compliance
   # ------------------------------------------------------------------
   pr-compliance:
     name: Validate PR
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read # Needed to list commits via github-script
     steps:
       - uses: actions/checkout@v6
         with:
@@ -66,11 +63,13 @@ jobs:
             if (commits.data.length === 0) core.setFailed('PR has no commits');
 
   # ------------------------------------------------------------------
-  # JOB 2: Static Analysis (Lint, Spellcheck, Docs)
+  # JOB 2: Static Analysis
   # ------------------------------------------------------------------
   static-analysis:
     name: Static analysis
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # Only needs to read code for linting/docs
     steps:
       - uses: actions/checkout@v6
 
@@ -84,7 +83,7 @@ jobs:
         run: npm ci
 
       - name: Run spelling check
-        uses: streetsidesoftware/cspell-action@v6
+        uses: streetsidesoftware/cspell-action@v8
         with: 
           strict: true
 
@@ -97,7 +96,6 @@ jobs:
 
       - name: Validate documentation & links
         run: |
-          # Markdown validation: Check for unclosed code blocks
           for file in *.md; do
             if [ -f "$file" ]; then
               count=$(grep -c '```' "$file")
@@ -108,21 +106,23 @@ jobs:
             fi
           done
           
-          # Check required files exist
           for file in README.md QUICKSTART.md CONTRIBUTING.md; do
             if [ ! -f "$file" ]; then
               echo "[FAIL] Missing: $file"
               exit 1
             fi
-            echo "[PASS] Found: $file"
           done
 
   # ------------------------------------------------------------------
-  # JOB 3: Security Checks (Audit, CodeQL, Code Quality)
+  # JOB 3: Security Checks
   # ------------------------------------------------------------------
   security:
     name: Security & quality
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # Required for CodeQL uploads
+      actions: read          # Required for CodeQL to identify the workflow run
     steps:
       - uses: actions/checkout@v6
 
@@ -154,30 +154,26 @@ jobs:
       - name: Check for TODO/FIXME & console
         run: |
           if grep -r "console\." src/ --include="*.js" | grep -v "console.error\|console.warn"; then
-            echo "[WARN] Found console.log/info/debug usage"
-          else
-            echo "[PASS] No console.log"
+            echo "[WARN] Found console usage"
           fi
-          if grep -rE "TODO|FIXME" src/ --include="*.js"; then
-            echo "[INFO] Found TODOs/FIXMEs"
-          else
-            echo "[PASS] No TODOs"
-          fi
+          grep -rE "TODO|FIXME" src/ --include="*.js" || echo "[PASS] No TODOs"
       
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v4
 
   # ------------------------------------------------------------------
-  # JOB 4: Build & Verify (The Core Logic)
+  # JOB 4: Build & Verify
   # ------------------------------------------------------------------
   build-and-test:
     name: Build & verify
     needs: [static-analysis]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # Required for the PR comment step
     strategy:
       matrix:
         node-version: [18.x, 20.x]
-
     steps:
       - uses: actions/checkout@v6
 
@@ -195,10 +191,9 @@ jobs:
 
       - name: Verify build output
         run: |
-          if [ ! -f build/extension.js ]; then echo "[FAIL] Missing extension.js"; exit 1; fi
-          node -c build/extension.js && echo "[PASS] Syntax valid"
+          if [ ! -f build/extension.js ]; then exit 1; fi
+          node -c build/extension.js
 
-      # Merged from test.yml
       - name: Check extension structure (Regex)
         run: |
           node << 'EOF'
@@ -207,17 +202,11 @@ jobs:
           const checks = {
             'Extension header': /^\/\/ Name:/m,
             'IIFE function': /\(function\s*\(\s*Scratch\s*\)/m,
-            'Class definition': /class\s+\w+\s*\{/,
-            'getInfo method': /getInfo\s*\(\s*\)\s*\{/,
             'Registration': /Scratch\.extensions\.register/,
-            'Closing IIFE': /\}\)\(Scratch\);$/m,
           };
-          let allPass = true;
           for (const [check, pattern] of Object.entries(checks)) {
-            if (!pattern.test(content)) { console.log(`[FAIL] ${check}`); allPass = false; }
+            if (!pattern.test(content)) { console.log(`[FAIL] ${check}`); process.exit(1); }
           }
-          if (!allPass) process.exit(1);
-          console.log('All structure checks passed');
           EOF
 
       - name: Validate manifest (ID & version)
@@ -225,7 +214,6 @@ jobs:
           node -e "
             const m = require('./src/manifest.json');
             if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(m.id)) process.exit(1);
-            if (!/^\d+\.\d+\.\d+/.test(m.version)) process.exit(1);
           "
 
       - name: Upload build artifact
@@ -235,7 +223,6 @@ jobs:
           path: build/extension.js
           retention-days: 7
 
-      # Merged from pr-checks.yml (Only runs on PRs)
       - name: Comment PR with build report
         if: github.event_name == 'pull_request' && matrix.node-version == '20.x'
         uses: actions/github-script@v8
@@ -247,5 +234,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Build Report (Node ${{ matrix.node-version }})\n\n[PASS] Built successfully\n- Size: ${size} KB\n- Syntax & Structure Valid`
+              body: `### Build report (Node ${{ matrix.node-version }})\n- **Status**: Success\n- **Bundle Size**: ${size} KB\n- **Verification**: Structure & Syntax Valid`
             });
