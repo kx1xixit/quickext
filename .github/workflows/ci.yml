@@ -178,7 +178,7 @@ jobs:
 
           TODOS=$(grep -rE "TODO|FIXME" src/ --include="*.js" || true)
           if [ ! -z "$TODOS" ]; then
-            echo "::info::Source contains TODO or FIXME markers."
+            echo "::notice::Source contains TODO or FIXME markers."
           fi
       
       - name: Perform CodeQL analysis
