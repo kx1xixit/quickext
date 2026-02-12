@@ -137,8 +137,16 @@ jobs:
 
       - name: Check for TODO/FIXME & console
         run: |
-          grep -r "console\." src/ --include="*.js" | grep -v "console.error\|console.warn" || echo "[PASS] No console.log"
-          grep -r "TODO\|FIXME" src/ --include="*.js" || echo "[PASS] No TODOs"
+          if grep -r "console\." src/ --include="*.js" | grep -v "console.error\|console.warn"; then
+            echo "[WARN] Found console.log/info/debug usage"
+          else
+            echo "[PASS] No console.log"
+          fi
+          if grep -rE "TODO|FIXME" src/ --include="*.js"; then
+            echo "[INFO] Found TODOs/FIXMEs"
+          else
+            echo "[PASS] No TODOs"
+          fi
       
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v4
