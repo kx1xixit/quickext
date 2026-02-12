@@ -9,8 +9,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SRC_DIR = path.join(__dirname, '../src');
 const BUILD_DIR = path.join(__dirname, '../build');
 const OUTPUT_FILE = path.join(BUILD_DIR, 'extension.js');
-const OUTPUT_MIN_FILE = path.join(BUILD_DIR, 'extension.min.js');
-const OUTPUT_MAX_FILE = path.join(BUILD_DIR, 'max.extension.js');
+const OUTPUT_MIN_FILE = path.join(BUILD_DIR, 'min.extension.js');
+const OUTPUT_MAX_FILE = path.join(BUILD_DIR, 'pretty.extension.js');
 
 // Create build directory if it doesn't exist
 if (!fs.existsSync(BUILD_DIR)) {
@@ -121,8 +121,8 @@ async function buildExtension() {
     fs.writeFileSync(OUTPUT_FILE, output, 'utf8');
 
     const size = (output.length / 1024).toFixed(2);
-    console.log(`[BUILD] Standard build successful: ${OUTPUT_FILE} (${size} KB)`);
-    console.log(`        Bundled ${sourceFiles.length} source file(s)`);
+    console.log(`[NORMAL] Standard build successful: ${OUTPUT_FILE} (${size} KB)`);
+    console.log(`         Bundled ${sourceFiles.length} source file(s)`);
 
     // --- Maximization Step (Prettier) ---
     try {
