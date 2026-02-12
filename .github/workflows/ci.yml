@@ -95,7 +95,7 @@ jobs:
         run: npx prettier --check src/
         continue-on-error: true
 
-- name: Validate documentation & links
+      - name: Validate documentation & links
         run: |
           # Markdown validation
           for file in *.md; do
