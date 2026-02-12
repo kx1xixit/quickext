@@ -97,9 +97,25 @@ jobs:
 
       - name: Validate documentation & links
         run: |
-          # Markdown validation
+          # Markdown validation: Check for unclosed code blocks
           for file in *.md; do
-            count=$(grep -c '
+            if [ -f "$file" ]; then
+              count=$(grep -c '```' "$file")
+              if [ $((count % 2)) -ne 0 ]; then
+                echo "[WARN] Unclosed code block in $file"
+                exit 1
+              fi
+            fi
+          done
+          
+          # Check required files exist
+          for file in README.md QUICKSTART.md CONTRIBUTING.md; do
+            if [ ! -f "$file" ]; then
+              echo "[FAIL] Missing: $file"
+              exit 1
+            fi
+            echo "[PASS] Found: $file"
+          done
 
   # ------------------------------------------------------------------
   # JOB 3: Security Checks (Audit, CodeQL, Code Quality)
