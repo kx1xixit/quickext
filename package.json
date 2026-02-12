@@ -9,7 +9,8 @@
     "watch": "node scripts/build.js --watch",
     "lint": "eslint src/",
     "format": "prettier --write src/",
-    "spellcheck": "cspell"
+    "spellcheck": "cspell",
+    "fullstack": "npm run format && npm run lint && npm run spellcheck && npm run build"
   },
   "keywords": [
     "turbowarp",
