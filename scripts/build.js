@@ -9,6 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SRC_DIR = path.join(__dirname, '../src');
 const BUILD_DIR = path.join(__dirname, '../build');
 const OUTPUT_FILE = path.join(BUILD_DIR, 'extension.js');
+const OUTPUT_MIN_FILE = path.join(BUILD_DIR, 'extension.min.js');
 
 // Create build directory if it doesn't exist
 if (!fs.existsSync(BUILD_DIR)) {
@@ -70,9 +71,9 @@ function getSourceFiles() {
 }
 
 /**
- * Build the extension by concatenating and cleaning JS files
+ * Build the extension by concatenating, cleaning, and minifying JS files
  */
-function buildExtension() {
+async function buildExtension() {
   try {
     const manifest = getManifest();
     const header = generateHeader(manifest);
@@ -116,12 +117,39 @@ function buildExtension() {
     // Close IIFE
     output += '})(Scratch);\n';
 
-    // Write output
+    // Write standard output
     fs.writeFileSync(OUTPUT_FILE, output, 'utf8');
 
     const size = (output.length / 1024).toFixed(2);
     console.log(`[BUILD] Extension build successful: ${OUTPUT_FILE} (${size} KB)`);
     console.log(`        Bundled ${sourceFiles.length} source file(s)`);
+
+    // --- Minification Step ---
+    try {
+      // Dynamic import to allow script to run even if terser isn't installed
+      const { minify } = await import('terser');
+      
+      const minified = await minify(output, {
+        compress: true,
+        mangle: true,
+        format: {
+          // Preserve the Metadata comments required by TurboWarp
+          comments: /^\/\/\s(Name|ID|Description|By|License|Version)/, 
+        },
+      });
+
+      if (minified.code) {
+        fs.writeFileSync(OUTPUT_MIN_FILE, minified.code, 'utf8');
+        const minSize = (minified.code.length / 1024).toFixed(2);
+        console.log(`[MINIFY] Minified output created: ${OUTPUT_MIN_FILE} (${minSize} KB)`);
+      }
+    } catch (err) {
+      if (err.code === 'ERR_MODULE_NOT_FOUND') {
+        console.warn('        (Skipping minification: "terser" not found. Run "npm install -D terser")');
+      } else {
+        console.error('        (Minification failed:', err.message, ')');
+      }
+    }
 
     return true;
   } catch (err) {
@@ -171,10 +199,12 @@ async function watchFiles() {
 // Check for --watch flag
 const watchMode = process.argv.includes('--watch');
 
-// Initial build
-buildExtension();
+// Execute
+(async () => {
+  await buildExtension();
 
-// Optional watch mode
-if (watchMode) {
-  watchFiles();
-}
+  // Optional watch mode
+  if (watchMode) {
+    watchFiles();
+  }
+})();
