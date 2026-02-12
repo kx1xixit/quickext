@@ -2,9 +2,9 @@ name: Continuous integration
 
 on:
   push:
-    branches: [main, develop, master]
+    branches: ['**'] # Runs on all branches
   pull_request:
-    branches: [main, develop, master]
+    branches: ['**']
   schedule:
     - cron: '0 2 * * 1' # Combined schedule (Monday 2AM)
 
