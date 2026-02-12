@@ -9,6 +9,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SRC_DIR = path.join(__dirname, '../src');
 const BUILD_DIR = path.join(__dirname, '../build');
 const OUTPUT_FILE = path.join(BUILD_DIR, 'extension.js');
+const OUTPUT_MIN_FILE = path.join(BUILD_DIR, 'min.extension.js');
+const OUTPUT_MAX_FILE = path.join(BUILD_DIR, 'pretty.extension.js');
+
+// --- Build State Guard ---
+let isBuilding = false;
+let pendingBuild = false;
 
 // Create build directory if it doesn't exist
 if (!fs.existsSync(BUILD_DIR)) {
@@ -51,7 +57,7 @@ function generateHeader(manifest) {
   header += `// By: ${metadata.by}\n`;
   header += `// License: ${metadata.license}\n`;
   header += `\n`;
-  header += `// Version ${metadata.version}\n`;
+  header += `// Version: ${metadata.version}\n`;
   header += `\n`;
 
   return header;
@@ -70,9 +76,9 @@ function getSourceFiles() {
 }
 
 /**
- * Build the extension by concatenating and cleaning JS files
+ * Build the extension by concatenating, cleaning, minifying, and maximizing JS files
  */
-function buildExtension() {
+async function buildExtension() {
   try {
     const manifest = getManifest();
     const header = generateHeader(manifest);
@@ -93,12 +99,11 @@ function buildExtension() {
 
       /**
        * TRANSFORM MODULES TO PLAIN JS
-       * These regexes remove ESM syntax so the browser doesn't crash.
        */
-      // 1. Remove import lines (e.g., import { x } from './y.js';)
+      // 1. Remove import lines
       content = content.replace(/^import\s+[\s\S]*?from\s+['"].*?['"];?/gm, '');
 
-      // 2. Remove 'export ' prefix from function/class/const declarations
+      // 2. Remove 'export ' prefix
       content = content.replace(/^export\s+/gm, '');
 
       // Indent the content for the IIFE
@@ -116,17 +121,80 @@ function buildExtension() {
     // Close IIFE
     output += '})(Scratch);\n';
 
-    // Write output
+    // Write standard output
     fs.writeFileSync(OUTPUT_FILE, output, 'utf8');
 
     const size = (output.length / 1024).toFixed(2);
-    console.log(`[BUILD] Extension build successful: ${OUTPUT_FILE} (${size} KB)`);
-    console.log(`        Bundled ${sourceFiles.length} source file(s)`);
+    console.log(`[NORMAL] Standard build successful: ${OUTPUT_FILE} (${size} KB)`);
+
+    // --- Maximization Step (Prettier) ---
+    try {
+      const { format, resolveConfig } = await import('prettier');
+      const prettierConfig = (await resolveConfig(OUTPUT_MAX_FILE)) || {};
+      const formatted = await format(output, {
+        ...prettierConfig,
+        parser: 'babel',
+      });
+
+      fs.writeFileSync(OUTPUT_MAX_FILE, formatted, 'utf8');
+      const maxSize = (formatted.length / 1024).toFixed(2);
+      console.log(`[PRETTY] Maximized output created: ${OUTPUT_MAX_FILE} (${maxSize} KB)`);
+    } catch (err) {
+      if (err.code === 'ERR_MODULE_NOT_FOUND') {
+        console.warn('        (Skipping maximization: "prettier" not found)');
+      } else {
+        console.warn('[PRETTY] Maximization failed:', err);
+      }
+    }
+
+    // --- Minification Step (Terser) ---
+    try {
+      const { minify } = await import('terser');
+      const minified = await minify(output, {
+        compress: true,
+        mangle: true,
+        format: {
+          comments: /^\s*(Name|ID|Description|By|License|Version):/, 
+        },
+      });
+
+      if (minified.code) {
+        fs.writeFileSync(OUTPUT_MIN_FILE, minified.code, 'utf8');
+        const minSize = (minified.code.length / 1024).toFixed(2);
+        console.log(`[MINIFY] Minified output created: ${OUTPUT_MIN_FILE} (${minSize} KB)`);
+      }
+    } catch (err) {
+      if (err.code === 'ERR_MODULE_NOT_FOUND') {
+        console.warn('        (Skipping minification: "terser" not found)');
+      } else {
+        console.warn('[MINIFY] Minification failed:', err);
+      }
+    }
 
     return true;
   } catch (err) {
     console.error('✗ Build failed:', err.message);
     return false;
+  }
+}
+
+/**
+ * Coalescing guard to prevent concurrent build runs
+ */
+async function guardedBuild() {
+  if (isBuilding) {
+    pendingBuild = true;
+    return;
+  }
+
+  isBuilding = true;
+  await buildExtension();
+  isBuilding = false;
+
+  if (pendingBuild) {
+    pendingBuild = false;
+    // Trigger the next build in the next tick
+    setImmediate(guardedBuild);
   }
 }
 
@@ -146,35 +214,28 @@ async function watchFiles() {
 
   const watcher = chokidar.watch(SRC_DIR, {
     ignored: /(^|[\/\\])\./,
+    ignoreInitial: true,
     awaitWriteFinish: {
       stabilityThreshold: 100,
       pollInterval: 100,
     },
   });
 
-  watcher.on('change', file => {
-    console.log(`Changed: ${path.basename(file)}`);
-    buildExtension();
-  });
-
-  watcher.on('add', file => {
-    console.log(`Added: ${path.basename(file)}`);
-    buildExtension();
-  });
-
-  watcher.on('unlink', file => {
-    console.log(`Removed: ${path.basename(file)}`);
-    buildExtension();
+  watcher.on('all', (event, file) => {
+    console.log(`[WATCH] ${event}: ${path.basename(file)}`);
+    guardedBuild();
   });
 }
 
 // Check for --watch flag
 const watchMode = process.argv.includes('--watch');
 
-// Initial build
-buildExtension();
+// Execute
+(async () => {
+  // Always run the initial build
+  await buildExtension();
 
-// Optional watch mode
-if (watchMode) {
-  watchFiles();
-}
+  if (watchMode) {
+    watchFiles();
+  }
+})();
