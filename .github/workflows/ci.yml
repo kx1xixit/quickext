@@ -98,15 +98,18 @@ jobs:
         run: |
           ERRORS=0
           echo "--- Checking Markdown Syntax ---"
+          # Loop through markdown files
           for file in *.md; do
             if [ -f "$file" ]; then
-              count=$(grep -c '```' "$file")
+              # 'grep -o' gets every match; 'wc -l' counts them. 
+              # This prevents exit code 1 when matches are 0.
+              count=$(grep -o '```' "$file" | wc -l)
+              
               if [ $((count % 2)) -ne 0 ]; then
-                # Creates a visible error annotation on the GitHub UI
                 echo "::error file=$file::Unclosed code block (found $count backticks). Ensure every opening \`\`\` has a closing \`\`\`."
                 ERRORS=$((ERRORS + 1))
               else
-                echo "[PASS] $file"
+                echo "[PASS] $file ($count backticks)"
               fi
             fi
           done
