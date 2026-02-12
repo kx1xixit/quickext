@@ -222,7 +222,7 @@ jobs:
 
       # Merged from pr-checks.yml (Only runs on PRs)
       - name: Comment PR with build report
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && matrix.node-version == '20.x'
         uses: actions/github-script@v8
         with:
           script: |
