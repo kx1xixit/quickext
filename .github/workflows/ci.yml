@@ -285,7 +285,7 @@ jobs:
     name: Dependabot auto-approve
     # Only run if previous jobs passed AND the actor is dependabot
     needs: [static-analysis, security, build-and-test]
-    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'  
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
