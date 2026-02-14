@@ -277,3 +277,32 @@ jobs:
               repo: context.repo.repo,
               body: `### Build report (Node ${{ matrix.node-version }})\n- **Status**: Success\n- **Bundle Size**: ${size} KB\n- **Verification**: Structure & Syntax Valid`
             });
+
+  # ------------------------------------------------------------------
+  # JOB 5: Dependabot Auto-Approve
+  # ------------------------------------------------------------------
+  dependabot-approve:
+    name: Dependabot auto-approve
+    # Only run if previous jobs passed AND the actor is dependabot
+    needs: [static-analysis, security, build-and-test]
+    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Approve and enable auto-merge
+        # Checks if the update is a major version bump. If it is, we skip auto-approving to allow for manual review.
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        run: |
+          gh pr review --approve "$PR_URL"
+          gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
