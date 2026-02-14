@@ -301,6 +301,7 @@ jobs:
         # Checks if the update is a major version bump. If it is, we skip auto-approving to allow for manual review.
         if: steps.metadata.outputs.update-type != 'version-update:semver-major'
         run: |
+          set -e
           gh pr review --approve "$PR_URL"
           gh pr merge --auto --squash "$PR_URL"
         env:
