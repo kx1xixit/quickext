@@ -22,8 +22,6 @@ export default [
           argsIgnorePattern: '^_',
           // This covers try/catch errors (like catch (_e))
           caughtErrorsIgnorePattern: '^_',
-          // Keep your preference for ignoring all args if you prefer
-          args: 'none', 
         },
       ],
       'no-console': 'off',
